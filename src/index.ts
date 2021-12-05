@@ -7,6 +7,8 @@ import commands from './commands';
 import Discord from 'discord.js';
 
 require('dotenv').config();
+import { initdb } from './exports';
+initdb();
 
 const slashCommands = Object.values(commands).map((command) => command.slashCommand.toJSON());
 
