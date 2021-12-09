@@ -1,1 +1,1 @@
-export { sequelize, initdb } from './sequelize';
+export { createEmbed, createAccountEmbed } from './createEmbed';

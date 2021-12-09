@@ -19,6 +19,7 @@
 	"homepage": "https://github.com/ahsan-a/Discotrader#readme",
 	"devDependencies": {
 		"@types/node": "^16.11.11",
+		"@types/validator": "^13.7.0",
 		"ts-node": "^10.4.0",
 		"typescript": "^4.5.2"
 	},

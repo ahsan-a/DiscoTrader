@@ -1,14 +1,15 @@
-import { Sequelize } from 'sequelize';
+import sequelize, { Sequelize } from 'sequelize';
+import { initModels } from './models';
 
-export let sequelize: Sequelize;
+let db: Sequelize;
 
-export async function initdb() {
+async function initdb() {
 	let url = process.env.DATABASE_URL || '';
 	if (!url) console.error('no url');
 
 	const splitted = url.split(/[\/:@]/g);
 
-	sequelize = new Sequelize({
+	db = new Sequelize({
 		database: splitted[7],
 		username: splitted[3],
 		password: splitted[4],
@@ -22,10 +23,12 @@ export async function initdb() {
 			},
 		},
 	});
-	try {
-		await sequelize.authenticate();
-		console.log('Connection has been established successfully.');
-	} catch (error) {
-		console.error('Unable to connect to the database:', error);
-	}
+	await db.authenticate();
+	await initModels();
 }
+
+function sql() {
+	return db;
+}
+
+export { initdb, sql };
