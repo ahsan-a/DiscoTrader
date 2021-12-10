@@ -56,5 +56,6 @@ export function createAccountEmbed(interaction: CommandInteraction<CacheType>) {
 				description: 'You must create an account to perform this action.',
 			}),
 		],
+		ephemeral: true,
 	});
 }

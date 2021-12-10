@@ -1,6 +1,5 @@
 import { sql } from '../index';
 import { DataTypes, Model } from 'sequelize';
-console.log('init user');
 
 interface UserAttributes {
 	id: number;
@@ -33,7 +32,7 @@ export async function initUser() {
 		{
 			timestamps: true,
 			sequelize: sql(),
-			tableName: 'users',
+			tableName: 'Users',
 		}
 	);
 	User.sync();

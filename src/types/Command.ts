@@ -1,14 +1,6 @@
-import { CommandInteraction, CacheType } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import Discord, { CommandInteraction, CacheType, ApplicationCommandDataResolvable } from 'discord.js';
 
 export interface Command {
-	execute(interaction: CommandInteraction<CacheType>): void;
-	slashCommand: SlashCommandBuilder;
-}
-
-export class CommandBase {
-	slashCommand: SlashCommandBuilder;
-	constructor(public name: string, public description: string) {
-		this.slashCommand = new SlashCommandBuilder().setName(this.name).setDescription(this.description);
-	}
+	execute(interaction: CommandInteraction<CacheType>): Promise<void>;
+	command: ApplicationCommandDataResolvable;
 }

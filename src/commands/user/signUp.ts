@@ -1,14 +1,14 @@
-import Discord, { CommandInteraction, CacheType } from 'discord.js';
-import { Command, CommandBase } from '../../types';
+import { CommandInteraction, CacheType, ApplicationCommandDataResolvable } from 'discord.js';
+import { Command } from '../../types';
 import { createEmbed } from '../../exports';
 import { User } from '../../db/models';
 
-export class SignUp extends CommandBase implements Command {
+export class SignUp implements Command {
 	async execute(interaction: CommandInteraction<CacheType>) {
-		if (await User.findOne({ where: { id: interaction.user.id } }).then((x) => x)) {
-			return interaction.reply('you already have an account.');
+		if (await User.findOne({ where: { id: parseInt(interaction.user.id) } })) {
+			return interaction.reply({ content: 'you already have an account.', ephemeral: true });
 		} else {
-			await User.create({ id: parseInt(interaction.user.id), balance: 1000 });
+			await User.findOrCreate({ where: { id: parseInt(interaction.user.id), balance: 1000 } });
 			return interaction.reply({
 				embeds: [
 					createEmbed({
@@ -19,8 +19,8 @@ export class SignUp extends CommandBase implements Command {
 			});
 		}
 	}
-
-	constructor() {
-		super('signup', 'Create a discotrader account.');
-	}
+	command: ApplicationCommandDataResolvable = {
+		name: 'signup',
+		description: 'Sign Up to DiscoTrader.',
+	};
 }

@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "esNext",
+		"target": "es2021",
 		"module": "CommonJS",
 		"lib": ["es6", "es2015", "dom"],
 		"declaration": true,
@@ -13,6 +13,7 @@
 		"noEmit": false,
 		"resolveJsonModule": true,
 		"baseUrl": "src",
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"noImplicitAny": true
 	}
 }
