@@ -15,7 +15,6 @@ import { initdb } from './db';
 	client.once('ready', () => {
 		const guild = client.guilds.cache.get(process.env.GUILD || '');
 		const slashCommands = guild?.commands || client.application?.commands;
-		slashCommands!.cache.forEach((x) => x.delete());
 
 		Object.values(commands)
 			.map((x) => x.command)

@@ -1,7 +1,2 @@
-import { User, initUser } from './User';
-
-export async function initModels() {
-	initUser();
-}
-
-export { User };
+export { User } from './User';
+export { Trade } from './Trade';

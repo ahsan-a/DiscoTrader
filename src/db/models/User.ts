@@ -1,39 +1,17 @@
-import { sql } from '../index';
-import { DataTypes, Model } from 'sequelize';
+import { Table, Column, Model, HasMany } from 'sequelize-typescript';
+import { DataTypes } from 'sequelize';
+import { Trade } from './Trade';
 
-interface UserAttributes {
-	id: number;
-	balance: number;
-	createdAt?: Date;
-	updatedAt?: Date;
-}
+@Table({
+	timestamps: true,
+})
+export class User extends Model {
+	@Column({
+		allowNull: false,
+		type: DataTypes.DECIMAL(16, 2),
+	})
+	balance!: number;
 
-export class User extends Model<UserAttributes, UserAttributes> implements UserAttributes {
-	public id!: number;
-	public balance!: number;
-
-	public readonly createdAt!: Date;
-	public readonly updatedAt!: Date;
-}
-
-export async function initUser() {
-	User.init(
-		{
-			id: {
-				type: DataTypes.DECIMAL(19, 0),
-				allowNull: false,
-				primaryKey: true,
-			},
-			balance: {
-				type: DataTypes.DECIMAL(16, 2),
-				allowNull: false,
-			},
-		},
-		{
-			timestamps: true,
-			sequelize: sql(),
-			tableName: 'Users',
-		}
-	);
-	User.sync();
+	@HasMany(() => Trade)
+	trades!: Trade[];
 }

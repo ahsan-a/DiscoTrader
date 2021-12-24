@@ -1,5 +1,5 @@
-import sequelize, { Sequelize } from 'sequelize';
-import { initModels } from './models';
+import { Sequelize } from 'sequelize-typescript';
+import { User, Trade } from './models';
 
 let db: Sequelize;
 
@@ -22,9 +22,12 @@ async function initdb() {
 				rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
 			},
 		},
+		models: [User, Trade],
 	});
+
+	User.sync({ alter: true });
+	Trade.sync({ alter: true });
 	await db.authenticate();
-	await initModels();
 }
 
 function sql() {
