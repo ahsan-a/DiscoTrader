@@ -9,13 +9,13 @@ export class Trade extends Model {
 	@Column(DataTypes.INTEGER)
 	quantity!: number;
 
-	@Column(DataTypes.DECIMAL(8, 2))
+	@Column(DataTypes.DECIMAL(12, 4))
 	price!: number;
 
 	@Column
 	stock!: boolean;
 
-	@Column(DataTypes.CHAR(5))
+	@Column(DataTypes.CHAR(12))
 	symbol!: string;
 
 	@ForeignKey(() => User)

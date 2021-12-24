@@ -1,5 +1,3 @@
-import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
 import commands from './commands';
 import Discord from 'discord.js';
 
@@ -26,8 +24,12 @@ import { initdb } from './db';
 	client.on('interactionCreate', async (interaction) => {
 		if (!interaction.isCommand()) return;
 
-		const { commandName } = interaction;
-		if (commandName in commands) commands[commandName].execute(interaction);
+		try {
+			const { commandName } = interaction;
+			if (commandName in commands) commands[commandName].execute(interaction);
+		} catch (e) {
+			console.log(e);
+		}
 	});
 
 	client.login(process.env.DISCORD_TOKEN);

@@ -31,7 +31,7 @@ export class Balance implements Command {
 			embeds: [
 				createEmbed({
 					title: `${username}'s Balance`,
-					fields: [{ name: 'Balance', value: `❂ ${balance.balance}` }],
+					fields: [{ name: 'Balance', value: `❂${balance.balance}` }],
 				}),
 			],
 		});
