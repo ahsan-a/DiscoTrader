@@ -25,7 +25,9 @@ export class Buy implements Command {
 			const symbol = (await finnhub.symbolLookup(options.name))?.result[0];
 
 			const quote = await finnhub.getQuote(symbol?.symbol || '');
-			if (!symbol || !quote.close)
+			if (!symbol || !quote.close) {
+				console.log('a');
+
 				return interaction.reply({
 					embeds: [
 						createEmbed({
@@ -35,6 +37,7 @@ export class Buy implements Command {
 						}),
 					],
 				});
+			}
 
 			const reg = {
 				symbol: symbol.symbol.toUpperCase(),
@@ -46,29 +49,58 @@ export class Buy implements Command {
 
 			if (reg.total > user.balance) {
 				const newQuantity = Math.floor(user.balance / reg.price);
-				await interaction.reply({
+				console.log(reg.total, user.balance);
+
+				return interaction.reply({
 					embeds: [
 						createEmbed({
 							title: 'Error: Insufficient Funds',
-							description: `You do not have enough funds to buy ${options.quantity} shares of ${reg.symbol} for ❂${reg.total}.
-							Your balance is ❂${user.balance}. You need ${(reg.total - user.balance).toFixed(2)} more for this
-							 trade, or buy ${newQuantity} shares for ❂${(newQuantity * reg.price).toFixed(2)}.`,
+							description: `You do not have enough funds to buy ${options.quantity} shares of ${reg.symbol} for ❂${reg.total.toFixed(
+								2
+							)}. Your balance is ❂${user.balance}. ${
+								user.balance > 0 ? `You need ❂${(reg.total - user.balance).toFixed(2)} more for this trade` : ''
+							}${newQuantity ? `, or you can buy ${newQuantity} shares for ❂${(newQuantity * reg.price).toFixed(2)}.` : '.'}`,
 						}),
 					],
-					components: [
-						new MessageActionRow().addComponents(
-							new MessageButton()
-								.setCustomId('buyNewQuantity')
-								.setLabel(`Buy ${newQuantity} shares for ❂${(newQuantity * reg.price).toFixed(2)}`)
-								.setStyle('PRIMARY')
-						),
-					],
+					components: newQuantity
+						? [
+								new MessageActionRow().addComponents(
+									new MessageButton()
+										.setCustomId('buyNewQuantity')
+										.setLabel(`Buy ${newQuantity} shares for ❂${(newQuantity * reg.price).toFixed(2)}`)
+										.setStyle('PRIMARY')
+								),
+						  ]
+						: [],
 				});
 			}
+
+			return interaction.reply({ embeds: [await this.buyStock(user, reg.quantity, reg.price, true, reg.symbol.toUpperCase())] });
 		} else if (options.type === 'crypto') {
 		}
 
-		interaction.reply(JSON.stringify(options));
+		console.log('c');
+
+		return interaction.reply(JSON.stringify(options));
+	}
+
+	private async buyStock(user: User, quantity: number, price: number, stock: boolean, symbol: string, returnEmbed: boolean = true) {
+		const trade = await Trade.create({
+			userId: user.id,
+			quantity,
+			price,
+			stock,
+			symbol,
+		});
+
+		user.balance = user.balance - price * quantity;
+		await user.save();
+
+		return createEmbed({
+			title: `${symbol} bought`,
+			description: `You bought ${quantity} shares of ${symbol} for ❂${price.toFixed(2)} each, totalling ❂${(price * quantity).toFixed(2)}. \n
+			Your balance is now ❂${user.balance.toFixed(2)}.`,
+		});
 	}
 
 	command: ApplicationCommandDataResolvable = {

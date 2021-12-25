@@ -2,16 +2,16 @@ import { CommandInteraction, CacheType, ApplicationCommandDataResolvable } from 
 import { Command } from '../../types';
 import { createEmbed, createAccountEmbed } from '../../exports';
 
-import { User } from '../../db/models';
+import { User, Trade } from '../../db/models';
 
 export class Balance implements Command {
 	async execute(interaction: CommandInteraction<CacheType>) {
 		const user = interaction.options.getUser('user');
-		let balance: User | null;
+		let dbUser: User | null;
 		let username: string;
 		if (user) {
-			balance = await User.findOne({ where: { id: parseInt(user.id) }, attributes: ['balance'] });
-			if (!balance)
+			dbUser = await User.findOne({ where: { id: parseInt(user.id) }, include: [Trade] });
+			if (!dbUser)
 				return interaction.reply({
 					embeds: [
 						createEmbed({
@@ -22,8 +22,8 @@ export class Balance implements Command {
 				});
 			username = user.username;
 		} else {
-			balance = await User.findOne({ where: { id: parseInt(interaction.user.id) }, attributes: ['balance'] });
-			if (!balance) return createAccountEmbed(interaction);
+			dbUser = await User.findOne({ where: { id: parseInt(interaction.user.id) }, include: [Trade] });
+			if (!dbUser) return createAccountEmbed(interaction);
 			username = interaction.user.username;
 		}
 
@@ -31,7 +31,14 @@ export class Balance implements Command {
 			embeds: [
 				createEmbed({
 					title: `${username}'s Balance`,
-					fields: [{ name: 'Balance', value: `❂${balance.balance}` }],
+					fields: [
+						{ name: 'Balance', value: `❂${dbUser.balance}`, inline: true },
+						{
+							name: 'Total Stock Value',
+							value: `❂${dbUser.trades.reduce((acc, cur) => acc + cur.price * cur.quantity, 0).toFixed(2)}`,
+							inline: true,
+						},
+					],
 				}),
 			],
 		});
