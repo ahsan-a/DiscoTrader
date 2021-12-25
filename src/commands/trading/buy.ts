@@ -1,9 +1,9 @@
 import { CommandInteraction, CacheType, ApplicationCommandDataResolvable, MessageActionRow, MessageButton } from 'discord.js';
 
-import { Command } from '../../../types';
-import { createEmbed, verifyAccount, alpha, finnhub } from '../../../exports';
+import { Command } from '../../types';
+import { createEmbed, verifyAccount, alpha, finnhub } from '../../exports';
 
-import { User, Trade } from '../../../db/models';
+import { User, Trade } from '../../db/models';
 export class Buy implements Command {
 	async execute(interaction: CommandInteraction<CacheType>) {
 		const user = await verifyAccount(interaction);
@@ -21,13 +21,22 @@ export class Buy implements Command {
 			quantity: interaction.options.getInteger('quantity') as number,
 		};
 
+		if (options.quantity < 1)
+			return interaction.reply({
+				embeds: [
+					createEmbed({
+						title: 'Error: Invalid Quantity',
+						description: 'You must buy at least 1 share.',
+						colour: 0xdd0000,
+					}),
+				],
+			});
+
 		if (options.type === 'stock') {
 			const symbol = (await finnhub.symbolLookup(options.name))?.result[0];
 
 			const quote = await finnhub.getQuote(symbol?.symbol || '');
 			if (!symbol || !quote.close) {
-				console.log('a');
-
 				return interaction.reply({
 					embeds: [
 						createEmbed({
@@ -49,7 +58,6 @@ export class Buy implements Command {
 
 			if (reg.total > user.balance) {
 				const newQuantity = Math.floor(user.balance / reg.price);
-				console.log(reg.total, user.balance);
 
 				return interaction.reply({
 					embeds: [
@@ -75,31 +83,39 @@ export class Buy implements Command {
 				});
 			}
 
-			return interaction.reply({ embeds: [await this.buyStock(user, reg.quantity, reg.price, true, reg.symbol.toUpperCase())] });
+			return interaction.reply({
+				embeds: [await this.buyStock(user, reg.quantity, reg.price, true, reg.symbol.toUpperCase(), symbol.description)],
+			});
 		} else if (options.type === 'crypto') {
+			return interaction.reply('Crypto coming soon!');
 		}
-
-		console.log('c');
-
-		return interaction.reply(JSON.stringify(options));
 	}
 
-	private async buyStock(user: User, quantity: number, price: number, stock: boolean, symbol: string, returnEmbed: boolean = true) {
-		const trade = await Trade.create({
+	private async buyStock(
+		user: User,
+		quantity: number,
+		price: number,
+		stock: boolean,
+		symbol: string,
+		description: string,
+		returnEmbed: boolean = true
+	) {
+		await Trade.create({
 			userId: user.id,
 			quantity,
 			price,
 			stock,
 			symbol,
 		});
-
 		user.balance = user.balance - price * quantity;
 		await user.save();
 
 		return createEmbed({
-			title: `${symbol} bought`,
-			description: `You bought ${quantity} shares of ${symbol} for ❂${price.toFixed(2)} each, totalling ❂${(price * quantity).toFixed(2)}. \n
-			Your balance is now ❂${user.balance.toFixed(2)}.`,
+			title: `${description} (${symbol}) Bought`,
+			description: `You bought **${quantity} ${quantity > 1 ? 'shares' : 'share'}** of ${description} **(${symbol})** for **❂${price.toFixed(
+				2
+			)} each**, totalling **❂${(price * quantity).toFixed(2)}**. \n
+			Your balance is now **❂${user.balance.toFixed(2)}**.`,
 		});
 	}
 
